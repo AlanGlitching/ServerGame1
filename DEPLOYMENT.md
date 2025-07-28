@@ -77,6 +77,7 @@ If needed, you can set these in Netlify:
 2. **Build fails on Netlify**
    - Check build logs in Netlify dashboard
    - Ensure all dependencies are in `package.json`
+   - Use the correct build command: `cd client && npm install && npm run build`
 
 3. **Railway deployment fails**
    - Check Railway logs
@@ -90,6 +91,9 @@ curl http://localhost:3001/health
 
 # Test frontend locally
 npm run dev:client
+
+# Build frontend locally
+npm run build
 
 # Check if servers are running
 netstat -an | findstr :300
