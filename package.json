@@ -15,10 +15,6 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "vite": "^5.0.0"
-  },
-  "dependencies": {
-    "socket.io-client": "^4.7.4"
+    "concurrently": "^8.2.2"
   }
 } 

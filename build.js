@@ -1,6 +1,5 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
 console.log('🚀 Starting build process...');
 
@@ -14,7 +13,7 @@ try {
   process.chdir('client');
   console.log('📁 Changed to client directory');
 
-  // Install dependencies
+  // Clean install dependencies
   console.log('📦 Installing dependencies...');
   execSync('npm install', { stdio: 'inherit' });
 
