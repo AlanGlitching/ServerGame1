@@ -4,6 +4,7 @@
   "description": "A multiplayer battleship game with Socket.IO - frontend deployable to Netlify, backend to Railway",
   "main": "index.js",
   "scripts": {
+    "start": "cd server && npm start",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
