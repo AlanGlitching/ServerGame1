@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .connection-status {
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .join-form {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .join-form input {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            margin-right: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .join-form input:focus {
+            border-color: #1e3c72;
+        }
+
+        .join-form button {
+            padding: 12px 30px;
+            background: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .join-form button:hover {
+            background: #2a5298;
+        }
+
+        .waiting-room {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .waiting-room h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1e3c72;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .game-area {
+            display: none;
+        }
+
+        .game-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .game-info h3 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .boards-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .board-section {
+            text-align: center;
+        }
+
+        .board-section h4 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .battleship-board {
+            display: inline-block;
+            border: 3px solid #1e3c72;
+            border-radius: 10px;
+            background: #f8f9fa;
+            padding: 10px;
+        }
+
+        .board-row {
+            display: flex;
+        }
+
+        .board-cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .board-cell:hover {
+            background-color: #e9ecef;
+        }
+
+        .board-cell.hit {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .board-cell.miss {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .board-cell.ship {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .board-cell.ship.hit {
+            background-color: #dc3545;
+        }
+
+        .board-cell.placement {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .board-cell.invalid {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .ship-placement {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .ship-placement h4 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .ship-list {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .ship-item {
+            padding: 8px 15px;
+            background: #1e3c72;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .ship-item:hover {
+            background: #2a5298;
+        }
+
+        .ship-item.selected {
+            background: #28a745;
+        }
+
+        .ship-item.placed {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .orientation-toggle {
+            margin: 15px 0;
+        }
+
+        .orientation-toggle button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .orientation-toggle button.active {
+            background: #28a745;
+        }
+
+        .game-controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .game-controls button {
+            padding: 12px 25px;
+            margin: 0 10px;
+            background: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .game-controls button:hover {
+            background: #2a5298;
+        }
+
+        .game-controls button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .message {
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .server-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .boards-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .board-cell {
+                width: 30px;
+                height: 30px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚢 Battleship Game</h1>
+            <p>Multiplayer battleship game with Socket.IO</p>
+        </div>
+
+        <div id="connectionStatus" class="connection-status disconnected">
+            Disconnected
+        </div>
+
+        <div id="joinForm" class="join-form">
+            <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+            <button onclick="joinWaitingRoom()">Join Waiting Room</button>
+        </div>
+
+        <div id="waitingRoom" class="waiting-room">
+            <h3>⏳ Waiting for opponent...</h3>
+            <div class="spinner"></div>
+            <p>Players in waiting room: <span id="waitingCount">0</span></p>
+        </div>
+
+        <div id="gameArea" class="game-area">
+            <div id="gameInfo" class="game-info">
+                <h3>Game Status</h3>
+                <p id="gameStatus">Setting up ships...</p>
+            </div>
+
+            <div id="messageArea"></div>
+
+            <div class="boards-container">
+                <div class="board-section">
+                    <h4>Your Board</h4>
+                    <div id="playerBoard" class="battleship-board"></div>
+                </div>
+                
+                <div class="board-section">
+                    <h4>Opponent's Board</h4>
+                    <div id="opponentBoard" class="battleship-board"></div>
+                </div>
+            </div>
+
+            <div id="shipPlacement" class="ship-placement">
+                <h4>Place Your Ships</h4>
+                <div class="ship-list" id="shipList"></div>
+                <div class="orientation-toggle">
+                    <button id="horizontalBtn" class="active" onclick="setOrientation('horizontal')">Horizontal</button>
+                    <button id="verticalBtn" onclick="setOrientation('vertical')">Vertical</button>
+                </div>
+                <div class="game-controls">
+                    <button id="startGameBtn" onclick="startGame()" disabled>Start Game</button>
+                    <button id="resetBtn" onclick="resetShips()">Reset Ships</button>
+                </div>
+            </div>
+
+            <div id="gameControls" class="game-controls" style="display: none;">
+                <button id="newGameBtn" onclick="newGame()">New Game</button>
+            </div>
+        </div>
+
+        <div class="server-info">
+            <p>🖥️ Server Status: <span id="serverStatus">Checking...</span></p>
+            <p>📡 Active Rooms: <span id="activeRooms">0</span></p>
+        </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html> 
