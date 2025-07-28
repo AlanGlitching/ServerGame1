@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship Game Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .links {
+            margin: 20px 0;
+        }
+        .links a {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .links a:hover { background: #218838; }
+    </style>
+</head>
+<body>
+    <h1>🚢 Battleship Game - System Test</h1>
+    
+    <div class="test-section">
+        <h2>✅ Local Development Status</h2>
+        <div id="backendStatus" class="status info">Testing backend connection...</div>
+        <div id="frontendStatus" class="status info">Frontend should be running on port 3000</div>
+        
+        <button onclick="testBackend()">Test Backend Connection</button>
+        <button onclick="openGame()">Open Game</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🌐 Quick Links</h2>
+        <div class="links">
+            <a href="http://localhost:3000" target="_blank">🎮 Play Game (Local)</a>
+            <a href="http://localhost:3001/health" target="_blank">🔧 Backend Health Check</a>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Deployment Checklist</h2>
+        <ul>
+            <li>✅ Repository pushed to GitHub</li>
+            <li>✅ Dependencies installed</li>
+            <li>✅ Local servers running</li>
+            <li>⏳ Deploy to Railway (Backend)</li>
+            <li>⏳ Deploy to Netlify (Frontend)</li>
+            <li>⏳ Update server URL in frontend</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 Next Steps</h2>
+        <ol>
+            <li><strong>Deploy Backend to Railway:</strong>
+                <ul>
+                    <li>Go to <a href="https://railway.app" target="_blank">Railway.app</a></li>
+                    <li>Sign in with GitHub</li>
+                    <li>Create new project from GitHub repo</li>
+                    <li>Select your repository: <code>AlanGlitching/ServerGame1</code></li>
+                    <li>Railway will auto-detect the server folder</li>
+                </ul>
+            </li>
+            <li><strong>Deploy Frontend to Netlify:</strong>
+                <ul>
+                    <li>Go to <a href="https://netlify.com" target="_blank">Netlify.com</a></li>
+                    <li>Sign in with GitHub</li>
+                    <li>New site from Git</li>
+                    <li>Build command: <code>cd client && npm install && npm run build</code></li>
+                    <li>Publish directory: <code>client/dist</code></li>
+                </ul>
+            </li>
+            <li><strong>Update Server URL:</strong>
+                <ul>
+                    <li>Get your Railway URL</li>
+                    <li>Update <code>client/main.js</code> with the Railway URL</li>
+                    <li>Redeploy frontend</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <script>
+        async function testBackend() {
+            const statusDiv = document.getElementById('backendStatus');
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                const data = await response.json();
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = `✅ Backend is running!<br>
+                    Status: ${data.status}<br>
+                    Active Rooms: ${data.activeRooms}<br>
+                    Waiting Players: ${data.waitingPlayers}`;
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ Backend connection failed: ${error.message}`;
+            }
+        }
+
+        function openGame() {
+            window.open('http://localhost:3000', '_blank');
+        }
+
+        // Auto-test backend on page load
+        window.onload = function() {
+            testBackend();
+            document.getElementById('frontendStatus').className = 'status success';
+            document.getElementById('frontendStatus').innerHTML = '✅ Frontend should be accessible at http://localhost:3000';
+        };
+    </script>
+</body>
+</html> 
