@@ -34,6 +34,10 @@ const SERVER_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:3001'  // Local development
   : RAILWAY_URL;  // Production (Railway)
 
+// Connection retry mechanism
+let connectionRetries = 0;
+const MAX_RETRIES = 3;
+
 // DOM elements
 const connectionStatus = document.getElementById('connectionStatus');
 const joinForm = document.getElementById('joinForm');
@@ -62,12 +66,17 @@ function init() {
 
 // Connect Socket.IO
 function connectSocket() {
+  console.log('Attempting to connect to:', SERVER_URL);
+  
   socket = io(SERVER_URL, {
-    transports: ['websocket', 'polling']
+    transports: ['websocket', 'polling'],
+    timeout: 10000,
+    forceNew: true
   });
 
   socket.on('connect', () => {
     console.log('Connected to server');
+    connectionRetries = 0;
     updateConnectionStatus(true);
   });
 
@@ -79,6 +88,19 @@ function connectSocket() {
   socket.on('connect_error', (error) => {
     console.error('Connection error:', error);
     updateConnectionStatus(false);
+    
+    // Retry connection
+    if (connectionRetries < MAX_RETRIES) {
+      connectionRetries++;
+      console.log(`Retrying connection (${connectionRetries}/${MAX_RETRIES})...`);
+      setTimeout(() => {
+        socket.disconnect();
+        connectSocket();
+      }, 2000);
+    } else {
+      console.error('Max connection retries reached');
+      showMessage(`Connection failed after ${MAX_RETRIES} attempts. Please check your Railway deployment.`, 'error');
+    }
   });
 
   // Game events
@@ -596,6 +618,26 @@ function showMessage(text, type = 'info') {
     }
   }, 3000);
 }
+
+// Test connection manually
+window.testConnection = function() {
+  console.log('Manual connection test initiated');
+  showMessage('Testing connection to Railway...', 'info');
+  
+  // Reset retry counter
+  connectionRetries = 0;
+  
+  // Disconnect existing socket if any
+  if (socket) {
+    socket.disconnect();
+  }
+  
+  // Try to connect
+  connectSocket();
+  
+  // Also test HTTP health
+  checkServerHealth();
+};
 
 // Page load initialization
 document.addEventListener('DOMContentLoaded', init); 
