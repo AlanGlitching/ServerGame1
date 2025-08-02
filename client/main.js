@@ -28,27 +28,20 @@ let placedShips = [];
 let selectedShip = null;
 let currentOrientation = 'horizontal';
 
-// Server URL - Temporarily use localhost for testing
-const RAILWAY_URL = 'http://localhost:3001'; // Using local simple server for now
-const SERVER_URL = RAILWAY_URL; // Always use localhost for testing
+// Server URL - Use localhost for testing
+const SERVER_URL = 'http://localhost:3001';
 
 // Connection retry mechanism
 let connectionRetries = 0;
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 
-// Fallback connection options for production
-const SOCKET_OPTIONS = window.location.hostname === 'localhost' 
-  ? {
-      transports: ['websocket', 'polling'],
-      timeout: 10000,
-      forceNew: true
-    }
-  : {
-      transports: ['polling', 'websocket'], // Try polling first for production
-      timeout: 15000,
-      forceNew: true,
-      withCredentials: false // Disable credentials for CORS
-    };
+// Connection options optimized for local development
+const SOCKET_OPTIONS = {
+  transports: ['websocket', 'polling'],
+  timeout: 10000,
+  forceNew: true,
+  withCredentials: false
+};
 
 // DOM elements
 const connectionStatus = document.getElementById('connectionStatus');
@@ -84,7 +77,12 @@ function init() {
 
 // Connect Socket.IO
 function connectSocket() {
-  console.log('Attempting to connect to:', SERVER_URL);
+  console.log('🔌 Attempting to connect to:', SERVER_URL);
+  
+  // Disconnect existing socket if any
+  if (socket) {
+    socket.disconnect();
+  }
   
   socket = io(SERVER_URL, SOCKET_OPTIONS);
 
@@ -97,9 +95,20 @@ function connectSocket() {
     showMessage('Connected to game server!', 'success');
   });
 
-  socket.on('disconnect', () => {
-    console.log('❌ Socket.IO disconnected');
+  socket.on('disconnect', (reason) => {
+    console.log('❌ Socket.IO disconnected:', reason);
     updateConnectionStatus(false);
+    
+    // Auto-reconnect on disconnect
+    if (reason === 'io server disconnect') {
+      console.log('🔄 Server disconnected, attempting to reconnect...');
+      setTimeout(() => {
+        if (connectionRetries < MAX_RETRIES) {
+          connectionRetries++;
+          connectSocket();
+        }
+      }, 1000);
+    }
   });
 
   socket.on('connect_error', (error) => {
@@ -117,12 +126,11 @@ function connectSocket() {
       connectionRetries++;
       console.log(`🔄 Retrying connection (${connectionRetries}/${MAX_RETRIES})...`);
       setTimeout(() => {
-        socket.disconnect();
         connectSocket();
       }, 2000);
     } else {
       console.error('❌ Max connection retries reached');
-      showMessage(`Connection failed after ${MAX_RETRIES} attempts. Please check your Railway deployment.`, 'error');
+      showMessage(`Connection failed after ${MAX_RETRIES} attempts. Please check if the server is running.`, 'error');
     }
   });
 

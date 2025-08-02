@@ -5,16 +5,40 @@ const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
+
+// Comprehensive CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow all origins for now to bypass CORS restrictions
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
+};
+
 const io = socketIo(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: function (origin, callback) {
+      // Allow all origins for Socket.IO
+      return callback(null, true);
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
   }
 });
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Add preflight handler
+app.options('*', cors(corsOptions));
 
 // Game state
 const gameState = {
@@ -34,11 +58,20 @@ const SHIPS = [
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  console.log('Health check requested from:', req.headers.origin);
+  
+  // Force CORS headers to override any restrictions
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
     activeRooms: Object.keys(gameState.rooms).length,
-    waitingPlayers: gameState.waitingPlayers.length
+    waitingPlayers: gameState.waitingPlayers.length,
+    origin: req.headers.origin || 'unknown'
   });
 });
 
