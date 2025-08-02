@@ -29,9 +29,7 @@ let selectedShip = null;
 let currentOrientation = 'horizontal';
 
 // Server URL - UPDATE THIS WITH YOUR RAILWAY URL AFTER DEPLOYMENT
-const SERVER_URL = import.meta.env.PROD 
-  ? 'https://your-railway-app.railway.app'  // ⚠️ REPLACE WITH YOUR RAILWAY URL
-  : 'http://localhost:3001';
+const SERVER_URL = 'http://localhost:3001';  // ⚠️ REPLACE WITH YOUR RAILWAY URL AFTER DEPLOYMENT
 
 // DOM elements
 const connectionStatus = document.getElementById('connectionStatus');
