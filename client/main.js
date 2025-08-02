@@ -564,6 +564,11 @@ function updateGameStatus() {
 
 // Show message
 function showMessage(text, type = 'info') {
+  // Show message area if it's hidden
+  if (messageArea.style.display === 'none') {
+    messageArea.style.display = 'block';
+  }
+  
   // Clear existing messages first to prevent stacking
   const existingMessages = messageArea.querySelectorAll('.message');
   if (existingMessages.length >= 3) {
@@ -580,6 +585,11 @@ function showMessage(text, type = 'info') {
   setTimeout(() => {
     if (message.parentNode) {
       message.remove();
+      
+      // Hide message area if no messages left
+      if (messageArea.children.length === 0) {
+        messageArea.style.display = 'none';
+      }
     }
   }, 3000);
 }

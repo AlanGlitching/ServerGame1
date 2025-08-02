@@ -299,12 +299,12 @@
 
         .message {
             text-align: center;
-            margin: 5px 0;
-            padding: 8px;
+            margin: 3px 0;
+            padding: 6px 10px;
             border-radius: 5px;
             font-weight: bold;
-            font-size: 14px;
-            max-width: 300px;
+            font-size: 13px;
+            max-width: 280px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -338,13 +338,18 @@
         }
 
         #messageArea {
-            min-height: 60px;
-            max-height: 120px;
+            position: fixed;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            max-height: 150px;
             overflow-y: auto;
-            margin: 10px 0;
-            padding: 5px;
-            border-radius: 5px;
-            background: rgba(248, 249, 250, 0.5);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 10px;
         }
 
         @media (max-width: 768px) {
@@ -372,6 +377,8 @@
             Disconnected
         </div>
 
+        <div id="messageArea" style="display: none;"></div>
+
         <div id="joinForm" class="join-form">
             <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
             <button onclick="joinWaitingRoom()">Join Waiting Room</button>
@@ -388,8 +395,6 @@
                 <h3>Game Status</h3>
                 <p id="gameStatus">Setting up ships...</p>
             </div>
-
-            <div id="messageArea"></div>
 
             <div class="boards-container">
                 <div class="board-section">
