@@ -88,6 +88,16 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log(`Player connected: ${socket.id}`);
 
+  // Test event handler for debugging
+  socket.on('test', (data) => {
+    console.log('Test event received:', data);
+    socket.emit('test_response', { 
+      message: 'Server received test event',
+      timestamp: new Date().toISOString(),
+      socketId: socket.id
+    });
+  });
+
   // Player joins waiting room
   socket.on('joinWaitingRoom', (playerName) => {
     const player = {
