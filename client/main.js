@@ -85,30 +85,39 @@ function connectSocket() {
   socket = io(SERVER_URL, SOCKET_OPTIONS);
 
   socket.on('connect', () => {
-    console.log('Connected to server');
+    console.log('✅ Socket.IO connected successfully!');
+    console.log('Socket ID:', socket.id);
+    console.log('Connected to server:', SERVER_URL);
     connectionRetries = 0;
     updateConnectionStatus(true);
+    showMessage('Connected to game server!', 'success');
   });
 
   socket.on('disconnect', () => {
-    console.log('Disconnected from server');
+    console.log('❌ Socket.IO disconnected');
     updateConnectionStatus(false);
   });
 
   socket.on('connect_error', (error) => {
-    console.error('Connection error:', error);
+    console.error('❌ Socket.IO connection error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      description: error.description,
+      context: error.context,
+      type: error.type
+    });
     updateConnectionStatus(false);
     
     // Retry connection
     if (connectionRetries < MAX_RETRIES) {
       connectionRetries++;
-      console.log(`Retrying connection (${connectionRetries}/${MAX_RETRIES})...`);
+      console.log(`🔄 Retrying connection (${connectionRetries}/${MAX_RETRIES})...`);
       setTimeout(() => {
         socket.disconnect();
         connectSocket();
       }, 2000);
     } else {
-      console.error('Max connection retries reached');
+      console.error('❌ Max connection retries reached');
       showMessage(`Connection failed after ${MAX_RETRIES} attempts. Please check your Railway deployment.`, 'error');
     }
   });
@@ -643,8 +652,8 @@ function showMessage(text, type = 'info') {
 
 // Test connection manually
 window.testConnection = function() {
-  console.log('Manual connection test initiated');
-  showMessage('Testing connection to Railway...', 'info');
+  console.log('🔧 Manual connection test initiated');
+  showMessage('Testing Socket.IO connection...', 'info');
   
   // Reset retry counter
   connectionRetries = 0;
@@ -657,8 +666,17 @@ window.testConnection = function() {
   // Try to connect
   connectSocket();
   
-  // Also test HTTP health
+  // Also test HTTP health (but don't rely on it)
   checkServerHealth();
+  
+  // Add a timeout to show connection status
+  setTimeout(() => {
+    if (socket && socket.connected) {
+      showMessage('✅ Socket.IO connection successful!', 'success');
+    } else {
+      showMessage('❌ Socket.IO connection failed', 'error');
+    }
+  }, 5000);
 };
 
 // Page load initialization
