@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .ip-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌐 Network Connection Test</h1>
+    
+    <div class="test-section">
+        <h2>📱 Device Information</h2>
+        <div class="ip-info">
+            <strong>Current Device:</strong> <span id="deviceInfo">Loading...</span><br>
+            <strong>Server IP:</strong> 192.168.31.164:3001<br>
+            <strong>Local Network Test:</strong> <span id="localTest">Not tested</span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🌐 HTTP Health Check</h2>
+        <div id="httpStatus" class="status info">Testing...</div>
+        <button onclick="testHttp()">Test HTTP Connection</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📡 Socket.IO Connection</h2>
+        <div id="socketStatus" class="status info">Testing...</div>
+        <button onclick="testSocket()">Test Socket.IO</button>
+        <button onclick="disconnectSocket()">Disconnect</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Debug Log</h2>
+        <div id="debugLog" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script>
+        const SERVER_URL = 'http://192.168.31.164:3001';
+        let socket = null;
+
+        function log(message) {
+            const logDiv = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+
+        function updateDeviceInfo() {
+            const deviceInfo = document.getElementById('deviceInfo');
+            deviceInfo.textContent = `${window.location.hostname} (${window.location.href})`;
+        }
+
+        async function testHttp() {
+            const statusDiv = document.getElementById('httpStatus');
+            statusDiv.className = 'status info';
+            statusDiv.textContent = 'Testing...';
+            
+            try {
+                log('Testing HTTP connection to: ' + SERVER_URL);
+                const response = await fetch(SERVER_URL + '/health');
+                const data = await response.json();
+                
+                log('HTTP Response: ' + JSON.stringify(data, null, 2));
+                
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ HTTP OK - Server is responding';
+                
+                // Update local test status
+                document.getElementById('localTest').textContent = '✅ Working';
+            } catch (error) {
+                log('HTTP Error: ' + error.message);
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ HTTP Failed - ' + error.message;
+                
+                // Update local test status
+                document.getElementById('localTest').textContent = '❌ Failed';
+            }
+        }
+
+        function testSocket() {
+            const statusDiv = document.getElementById('socketStatus');
+            statusDiv.className = 'status info';
+            statusDiv.textContent = 'Testing...';
+            
+            log('Testing Socket.IO connection to: ' + SERVER_URL);
+            
+            // Disconnect existing socket if any
+            if (socket) {
+                socket.disconnect();
+            }
+            
+            socket = io(SERVER_URL, {
+                transports: ['websocket', 'polling'],
+                timeout: 10000,
+                forceNew: true,
+                withCredentials: false
+            });
+
+            socket.on('connect', () => {
+                log('✅ Socket.IO connected! ID: ' + socket.id);
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Socket.IO Connected - ID: ' + socket.id;
+            });
+
+            socket.on('disconnect', (reason) => {
+                log('❌ Socket.IO disconnected: ' + reason);
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Socket.IO Disconnected - ' + reason;
+            });
+
+            socket.on('connect_error', (error) => {
+                log('❌ Socket.IO connection error: ' + error.message);
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Socket.IO Error - ' + error.message;
+            });
+
+            // Test a simple event
+            socket.on('connect', () => {
+                log('Sending test event...');
+                socket.emit('test', { message: 'Hello from network test page' });
+            });
+
+            socket.on('test_response', (data) => {
+                log('Received test response: ' + JSON.stringify(data));
+            });
+        }
+
+        function disconnectSocket() {
+            if (socket) {
+                socket.disconnect();
+                log('Manually disconnected Socket.IO');
+            }
+        }
+
+        // Auto-test on load
+        window.onload = function() {
+            log('Network test page loaded');
+            updateDeviceInfo();
+            testHttp();
+            setTimeout(testSocket, 2000);
+        };
+    </script>
+</body>
+</html> 
