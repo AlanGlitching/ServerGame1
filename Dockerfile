@@ -15,8 +15,8 @@ RUN cd server && npm ci
 # Copy source code
 COPY . .
 
-# Expose port
-EXPOSE 3001
+# Expose port (Railway will use PORT environment variable)
+EXPOSE $PORT
 
-# Start the server
-CMD ["sh", "-c", "cd server && npm start"] 
+# Start the server with debugging
+CMD ["sh", "-c", "echo 'Starting server on port $PORT' && cd server && npm start"] 
