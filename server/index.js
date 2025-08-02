@@ -7,17 +7,33 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://*.netlify.app", "https://*.railway.app", "*"],
+    origin: function (origin, callback) {
+      // Allow all origins for Socket.IO
+      return callback(null, true);
+    },
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
   }
 });
 
 // Middleware
 app.use(cors({
-  origin: ["http://localhost:3000", "https://*.netlify.app", "https://*.railway.app", "*"],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow all origins for now to bypass Railway's CORS restrictions
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Add preflight handler
+app.options('*', cors());
+
 app.use(express.json());
 
 // Game state
@@ -40,6 +56,12 @@ const SHIPS = [
 app.get('/health', (req, res) => {
   console.log('Health check requested from:', req.headers.origin);
   
+  // Force CORS headers to override Railway's restrictions
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
   const healthData = { 
     status: 'OK', 
     timestamp: new Date().toISOString(),
@@ -49,10 +71,6 @@ app.get('/health', (req, res) => {
   };
   
   res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
   res.json(healthData);
 });
 
