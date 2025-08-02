@@ -29,7 +29,7 @@ let selectedShip = null;
 let currentOrientation = 'horizontal';
 
 // Server URL - Automatically detects environment
-const RAILWAY_URL = 'https://your-railway-app.railway.app'; // ⚠️ REPLACE WITH YOUR ACTUAL RAILWAY URL
+const RAILWAY_URL = 'https://production-asia-southeast1-eqsg3a.railway.app'; // Railway backend
 const SERVER_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:3001'  // Local development
   : RAILWAY_URL;  // Production (Railway)
