@@ -390,8 +390,10 @@ function checkGameOver(board) {
 
 // Start server
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Battleship server running on port ${PORT}`);
   console.log(`🌐 Health check: http://localhost:${PORT}/health`);
+  console.log(`🌐 Network access: http://192.168.31.164:${PORT}/health`);
   console.log(`📡 Socket.IO endpoint: http://localhost:${PORT}/socket.io/`);
+  console.log(`📡 Network Socket.IO: http://192.168.31.164:${PORT}/socket.io/`);
 }); 

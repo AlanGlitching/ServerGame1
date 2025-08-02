@@ -28,8 +28,9 @@ let placedShips = [];
 let selectedShip = null;
 let currentOrientation = 'horizontal';
 
-// Server URL - Use localhost for testing
-const SERVER_URL = 'http://localhost:3001';
+// Server URL - Detect if we're on localhost or deployed
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const SERVER_URL = isLocalhost ? 'http://localhost:3001' : 'http://192.168.31.164:3001';
 
 // Connection retry mechanism
 let connectionRetries = 0;
