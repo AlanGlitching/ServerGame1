@@ -28,11 +28,9 @@ let placedShips = [];
 let selectedShip = null;
 let currentOrientation = 'horizontal';
 
-// Server URL - Automatically detects environment
-const RAILWAY_URL = 'https://production-asia-southeast1-eqsg3a.railway.app'; // Railway backend
-const SERVER_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3001'  // Local development
-  : RAILWAY_URL;  // Production (Railway)
+// Server URL - Temporarily use localhost for testing
+const RAILWAY_URL = 'http://localhost:3001'; // Using local simple server for now
+const SERVER_URL = RAILWAY_URL; // Always use localhost for testing
 
 // Connection retry mechanism
 let connectionRetries = 0;
