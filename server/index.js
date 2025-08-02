@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const path = require('path'); // Added for static file serving
 
 const app = express();
 const server = http.createServer(app);
@@ -18,7 +19,7 @@ const io = socketIo(server, {
 });
 
 // Middleware
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
@@ -29,12 +30,18 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Add preflight handler
-app.options('*', cors());
+app.options('*', cors(corsOptions));
 
-app.use(express.json());
+// Root endpoint
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 
 // Game state
 const gameState = {
