@@ -7,13 +7,17 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: ["http://localhost:3000", "https://*.netlify.app", "https://*.railway.app", "*"],
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:3000", "https://*.netlify.app", "https://*.railway.app", "*"],
+  credentials: true
+}));
 app.use(express.json());
 
 // Game state
@@ -34,12 +38,22 @@ const SHIPS = [
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
+  console.log('Health check requested from:', req.headers.origin);
+  
+  const healthData = { 
     status: 'OK', 
     timestamp: new Date().toISOString(),
     activeRooms: Object.keys(gameState.rooms).length,
-    waitingPlayers: gameState.waitingPlayers.length
-  });
+    waitingPlayers: gameState.waitingPlayers.length,
+    origin: req.headers.origin || 'unknown'
+  };
+  
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  res.json(healthData);
 });
 
 // Socket.IO connection handling
