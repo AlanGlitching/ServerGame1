@@ -68,6 +68,12 @@ const gameControls = document.getElementById('gameControls');
 const serverStatus = document.getElementById('serverStatus');
 const activeRooms = document.getElementById('activeRooms');
 
+// Game over overlay elements
+const gameOverlay = document.getElementById('gameOverlay');
+const gameResult = document.getElementById('gameResult');
+const resultTitle = document.getElementById('resultTitle');
+const resultMessage = document.getElementById('resultMessage');
+
 // Initialize
 function init() {
   connectSocket();
@@ -263,8 +269,10 @@ function handleShotResult(data) {
     
     if (winner === socket.id) {
       showMessage('You won!', 'success');
+      showGameOverOverlay(true); // Show big win overlay
     } else {
       showMessage('You lost!', 'error');
+      showGameOverOverlay(false); // Show big lose overlay
     }
   } else {
     gameState.currentTurn = nextTurn;
@@ -276,6 +284,12 @@ function handleShotResult(data) {
 function handleOpponentDisconnected() {
   showMessage('Opponent disconnected!', 'error');
   gameState.gameOver = true;
+  
+  // Show special overlay for opponent disconnect
+  resultTitle.textContent = '🏴‍☠️ OPPONENT DISCONNECTED 🏴‍☠️';
+  resultMessage.textContent = 'Your opponent has left the game. You win by default!';
+  gameResult.className = 'game-result win';
+  gameOverlay.classList.add('show');
 }
 
 // Create ship list
@@ -647,6 +661,32 @@ function showMessage(text, type = 'info') {
     }
   }, 3000);
 }
+
+// Show big win/lose overlay
+function showGameOverOverlay(isWin) {
+  if (isWin) {
+    resultTitle.textContent = '🎉 VICTORY! 🎉';
+    resultMessage.textContent = 'Congratulations! You have sunk all enemy ships and won the battle!';
+    gameResult.className = 'game-result win';
+  } else {
+    resultTitle.textContent = '😔 DEFEAT 😔';
+    resultMessage.textContent = 'All your ships have been sunk. Better luck next time!';
+    gameResult.className = 'game-result lose';
+  }
+  
+  gameOverlay.classList.add('show');
+}
+
+// Close game over overlay
+window.closeGameOverlay = function() {
+  gameOverlay.classList.remove('show');
+};
+
+// Start new game from overlay
+window.startNewGame = function() {
+  closeGameOverlay();
+  newGame();
+};
 
 // Test connection manually
 window.testConnection = function() {
