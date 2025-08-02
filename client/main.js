@@ -28,9 +28,36 @@ let placedShips = [];
 let selectedShip = null;
 let currentOrientation = 'horizontal';
 
-// Server URL - Detect if we're on localhost or deployed
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const SERVER_URL = isLocalhost ? 'http://localhost:3001' : 'http://192.168.31.164:3001';
+// Server URL - Smart detection for different scenarios
+function getServerURL() {
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  
+  // If accessing via localhost or 127.0.0.1, use localhost for server
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:3001';
+  }
+  
+  // If accessing via IP address (same device), use localhost for server
+  if (hostname === '192.168.31.164') {
+    return 'http://localhost:3001';
+  }
+  
+  // If accessing via Netlify or other external domain, use IP for server
+  if (hostname.includes('netlify.app') || hostname.includes('railway.app')) {
+    return 'http://192.168.31.164:3001';
+  }
+  
+  // Default fallback
+  return 'http://localhost:3001';
+}
+
+const SERVER_URL = getServerURL();
+
+// Debug information
+console.log('🌐 Client hostname:', window.location.hostname);
+console.log('🌐 Client URL:', window.location.href);
+console.log('🔌 Server URL:', SERVER_URL);
 
 // Connection retry mechanism
 let connectionRetries = 0;
