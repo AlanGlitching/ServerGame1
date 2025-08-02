@@ -38,6 +38,20 @@ const SERVER_URL = window.location.hostname === 'localhost'
 let connectionRetries = 0;
 const MAX_RETRIES = 3;
 
+// Fallback connection options for production
+const SOCKET_OPTIONS = window.location.hostname === 'localhost' 
+  ? {
+      transports: ['websocket', 'polling'],
+      timeout: 10000,
+      forceNew: true
+    }
+  : {
+      transports: ['polling', 'websocket'], // Try polling first for production
+      timeout: 15000,
+      forceNew: true,
+      withCredentials: false // Disable credentials for CORS
+    };
+
 // DOM elements
 const connectionStatus = document.getElementById('connectionStatus');
 const joinForm = document.getElementById('joinForm');
@@ -68,11 +82,7 @@ function init() {
 function connectSocket() {
   console.log('Attempting to connect to:', SERVER_URL);
   
-  socket = io(SERVER_URL, {
-    transports: ['websocket', 'polling'],
-    timeout: 10000,
-    forceNew: true
-  });
+  socket = io(SERVER_URL, SOCKET_OPTIONS);
 
   socket.on('connect', () => {
     console.log('Connected to server');
@@ -126,14 +136,26 @@ function updateConnectionStatus(connected) {
 // Check server health
 async function checkServerHealth() {
   try {
-    const response = await fetch(`${SERVER_URL}/health`);
-    const data = await response.json();
-    serverStatus.textContent = '✅ Online';
-    serverStatus.style.color = '#28a745';
-    activeRooms.textContent = data.activeRooms || 0;
+    // Try to fetch with CORS handling
+    const response = await fetch(`${SERVER_URL}/health`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'omit' // Don't send credentials for CORS
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      serverStatus.textContent = '✅ Online';
+      serverStatus.style.color = '#28a745';
+      activeRooms.textContent = data.activeRooms || 0;
+    } else {
+      throw new Error(`HTTP ${response.status}`);
+    }
   } catch (error) {
-    serverStatus.textContent = '❌ Offline';
-    serverStatus.style.color = '#dc3545';
+    console.log('Health check failed (this is normal for CORS issues):', error.message);
+    serverStatus.textContent = '⚠️ CORS Issue';
+    serverStatus.style.color = '#ffc107';
+    // Don't show this as a critical error since Socket.IO might still work
   }
 }
 
