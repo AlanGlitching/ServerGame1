@@ -178,21 +178,29 @@ function handleShotResult(data) {
     opponentBoard[y][x] = result.hit ? 'H' : 'M';
     updateOpponentBoard();
     
+    // Only show messages for hits and ship sinks
     if (result.hit) {
-      showMessage(`Hit! ${result.sunk ? 'Ship sunk!' : ''}`, 'success');
-    } else {
-      showMessage('Miss!', 'info');
+      if (result.sunk) {
+        showMessage(`Ship sunk!`, 'success');
+      } else {
+        showMessage(`Hit!`, 'success');
+      }
     }
+    // Don't show miss messages to reduce clutter
   } else {
     // Update player's board with opponent's shot
     playerBoard[y][x] = result.hit ? 'H' : 'M';
     updatePlayerBoard();
     
+    // Only show messages for hits and ship sinks
     if (result.hit) {
-      showMessage(`You were hit! ${result.sunk ? 'Ship sunk!' : ''}`, 'error');
-    } else {
-      showMessage('Opponent missed!', 'info');
+      if (result.sunk) {
+        showMessage(`Your ship was sunk!`, 'error');
+      } else {
+        showMessage(`You were hit!`, 'error');
+      }
     }
+    // Don't show miss messages to reduce clutter
   }
   
   if (gameOver) {
@@ -556,15 +564,24 @@ function updateGameStatus() {
 
 // Show message
 function showMessage(text, type = 'info') {
+  // Clear existing messages first to prevent stacking
+  const existingMessages = messageArea.querySelectorAll('.message');
+  if (existingMessages.length >= 3) {
+    existingMessages[0].remove(); // Remove oldest message
+  }
+  
   const message = document.createElement('div');
   message.className = `message ${type}`;
   message.textContent = text;
   
   messageArea.appendChild(message);
   
+  // Auto-remove after 3 seconds (shorter duration)
   setTimeout(() => {
-    message.remove();
-  }, 5000);
+    if (message.parentNode) {
+      message.remove();
+    }
+  }, 3000);
 }
 
 // Page load initialization

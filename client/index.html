@@ -299,10 +299,14 @@
 
         .message {
             text-align: center;
-            margin: 15px 0;
-            padding: 10px;
+            margin: 5px 0;
+            padding: 8px;
             border-radius: 5px;
             font-weight: bold;
+            font-size: 14px;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .message.info {
@@ -331,6 +335,16 @@
             border-radius: 10px;
             font-size: 14px;
             color: #6c757d;
+        }
+
+        #messageArea {
+            min-height: 60px;
+            max-height: 120px;
+            overflow-y: auto;
+            margin: 10px 0;
+            padding: 5px;
+            border-radius: 5px;
+            background: rgba(248, 249, 250, 0.5);
         }
 
         @media (max-width: 768px) {
