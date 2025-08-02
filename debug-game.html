@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship Game Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        button:hover { background: #0056b3; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚢 Battleship Game Debug</h1>
+    
+    <div class="debug-section">
+        <h2>🔧 Server Status</h2>
+        <div id="serverStatus" class="status info">Checking server...</div>
+        <button onclick="checkServer()">Check Server</button>
+        <button onclick="checkSocket()">Test Socket.IO</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>🎮 Game Links</h2>
+        <p><strong>Local Game:</strong> <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+        <p><strong>Backend Health:</strong> <a href="http://localhost:3001/health" target="_blank">http://localhost:3001/health</a></p>
+        <button onclick="openGame()">Open Game in New Tab</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>📋 Common Issues</h2>
+        <ul>
+            <li><strong>Connection Issues:</strong> Make sure both servers are running (ports 3000 and 3001)</li>
+            <li><strong>Socket.IO Errors:</strong> Check browser console for connection errors</li>
+            <li><strong>Game Not Starting:</strong> Try refreshing the page and joining again</li>
+            <li><strong>Two Players Needed:</strong> Open two browser tabs to test multiplayer</li>
+        </ul>
+    </div>
+
+    <div class="debug-section">
+        <h2>📝 Debug Log</h2>
+        <div id="debugLog" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>🧪 Quick Test</h2>
+        <p>Test the game with two players:</p>
+        <ol>
+            <li>Open <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> in two browser tabs</li>
+            <li>Enter different names (e.g., "Player1" and "Player2")</li>
+            <li>Click "Join Waiting Room" in both tabs</li>
+            <li>Wait for matchmaking (should happen automatically)</li>
+            <li>Place ships and start the game</li>
+        </ol>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+
+        async function checkServer() {
+            const statusDiv = document.getElementById('serverStatus');
+            statusDiv.className = 'status info';
+            statusDiv.textContent = 'Checking server...';
+            log('Checking server health...');
+
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                const data = await response.json();
+                
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `✅ Server OK - Active Rooms: ${data.activeRooms}, Waiting Players: ${data.waitingPlayers}`;
+                log(`Server health check successful: ${JSON.stringify(data)}`);
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Server not responding';
+                log(`Server health check failed: ${error.message}`);
+            }
+        }
+
+        async function checkSocket() {
+            log('Testing Socket.IO connection...');
+            
+            try {
+                // Load Socket.IO client dynamically
+                const script = document.createElement('script');
+                script.src = 'https://cdn.socket.io/4.7.4/socket.io.min.js';
+                document.head.appendChild(script);
+                
+                script.onload = () => {
+                    const socket = io('http://localhost:3001');
+                    
+                    socket.on('connect', () => {
+                        log('✅ Socket.IO connected successfully');
+                        socket.disconnect();
+                    });
+                    
+                    socket.on('connect_error', (error) => {
+                        log(`❌ Socket.IO connection failed: ${error.message}`);
+                    });
+                    
+                    setTimeout(() => {
+                        if (!socket.connected) {
+                            log('❌ Socket.IO connection timeout');
+                        }
+                    }, 5000);
+                };
+            } catch (error) {
+                log(`❌ Socket.IO test failed: ${error.message}`);
+            }
+        }
+
+        function openGame() {
+            window.open('http://localhost:3000', '_blank');
+        }
+
+        // Auto-check server on load
+        window.onload = function() {
+            log('Debug page loaded');
+            checkServer();
+        };
+    </script>
+</body>
+</html> 

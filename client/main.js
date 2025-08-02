@@ -351,8 +351,14 @@ function handlePlayerBoardHoverOut() {
 // Handle opponent board click
 function handleOpponentBoardClick(x, y) {
   if (!gameState.gameStarted || gameState.gameOver) return;
-  if (gameState.currentTurn !== socket.id) return;
-  if (opponentBoard[y][x] !== null) return; // Already shot here
+  if (gameState.currentTurn !== socket.id) {
+    showMessage('Not your turn!', 'error');
+    return;
+  }
+  if (opponentBoard[y][x] !== null) {
+    showMessage('Already shot at this location!', 'error');
+    return;
+  }
   
   socket.emit('makeShot', { x, y });
 }
@@ -528,18 +534,23 @@ window.newGame = function() {
 function updateGameStatus() {
   if (gameState.gameOver) {
     if (gameState.winner === socket.id) {
-      gameStatus.textContent = 'You won!';
+      gameStatus.textContent = '🎉 You won! Congratulations!';
+      gameStatus.style.color = '#28a745';
     } else {
-      gameStatus.textContent = 'You lost!';
+      gameStatus.textContent = '😔 You lost! Better luck next time!';
+      gameStatus.style.color = '#dc3545';
     }
   } else if (gameState.gameStarted) {
     if (gameState.currentTurn === socket.id) {
-      gameStatus.textContent = 'Your turn';
+      gameStatus.textContent = '🎯 Your turn - Click on opponent\'s board to shoot!';
+      gameStatus.style.color = '#007bff';
     } else {
-      gameStatus.textContent = "Opponent's turn";
+      gameStatus.textContent = '⏳ Opponent\'s turn - Please wait...';
+      gameStatus.style.color = '#6c757d';
     }
   } else {
-    gameStatus.textContent = 'Setting up ships...';
+    gameStatus.textContent = '🚢 Setting up ships... Place all your ships to start!';
+    gameStatus.style.color = '#1e3c72';
   }
 }
 

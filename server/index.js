@@ -119,14 +119,30 @@ io.on('connection', (socket) => {
     if (!opponent || !opponent.board) return;
 
     const { x, y } = coordinates;
+    
+    // Validate coordinates
+    if (x < 0 || x >= 10 || y < 0 || y >= 10) {
+      socket.emit('invalidShot', 'Invalid coordinates');
+      return;
+    }
+    
+    // Check if already shot at this location
+    if (opponent.board[y][x] === 'H' || opponent.board[y][x] === 'M') {
+      socket.emit('invalidShot', 'Already shot at this location');
+      return;
+    }
+    
     const result = processShot(opponent.board, x, y);
 
-    // Update opponent's board
+    // Update opponent's board with hit/miss marker
     opponent.board[y][x] = result.hit ? 'H' : 'M';
 
-    // Check if ship is sunk
-    if (result.hit && result.sunk) {
-      result.sunkShip = findSunkShip(opponent.ships, x, y);
+    // Check if ship is sunk AFTER marking the hit
+    if (result.hit) {
+      result.sunk = checkShipSunk(opponent.board, result.shipName);
+      if (result.sunk) {
+        result.sunkShip = findSunkShip(opponent.ships, x, y);
+      }
     }
 
     // Check if game is over
@@ -136,8 +152,11 @@ io.on('connection', (socket) => {
       room.winner = socket.id;
     }
 
-    // Switch turns
-    room.currentTurn = opponentId;
+    // Switch turns (Battleship rule: miss = switch turn, hit = same player continues)
+    if (!result.hit) {
+      room.currentTurn = opponentId;
+    }
+    // If it's a hit, the same player continues (turn doesn't change)
 
     // Send results to both players
     io.to(player.roomId).emit('shotResult', {
@@ -149,7 +168,7 @@ io.on('connection', (socket) => {
       nextTurn: room.currentTurn
     });
 
-    console.log(`Player ${player.name} shot at (${x}, ${y}) - ${result.hit ? 'Hit' : 'Miss'}`);
+    console.log(`Player ${player.name} shot at (${x}, ${y}) - ${result.hit ? 'Hit' : 'Miss'}${result.sunk ? ' - Ship Sunk!' : ''}`);
   });
 
   // Player disconnects
@@ -276,15 +295,17 @@ function createBoard(ships) {
 function processShot(board, x, y) {
   const cell = board[y][x];
   
-  if (cell === null) {
-    return { hit: false, sunk: false };
-  }
-  
+  // Check if already shot at this location
   if (cell === 'H' || cell === 'M') {
     return { hit: false, sunk: false, alreadyShot: true };
   }
   
-  // Check if ship is sunk
+  // Check if it's a miss (no ship at this location)
+  if (cell === null) {
+    return { hit: false, sunk: false };
+  }
+  
+  // It's a hit! Check if this ship is now sunk
   const sunk = checkShipSunk(board, cell);
   
   return { hit: true, sunk, shipName: cell };
@@ -292,14 +313,15 @@ function processShot(board, x, y) {
 
 // Check if ship is sunk
 function checkShipSunk(board, shipName) {
+  // Check if any part of this ship is still not hit
   for (let y = 0; y < 10; y++) {
     for (let x = 0; x < 10; x++) {
       if (board[y][x] === shipName) {
-        return false; // Ship still has parts remaining
+        return false; // Ship still has unhit parts
       }
     }
   }
-  return true;
+  return true; // All parts of this ship are hit
 }
 
 // Find sunk ship details
@@ -321,14 +343,17 @@ function findSunkShip(ships, x, y) {
 
 // Check if game is over
 function checkGameOver(board) {
+  // Check if any ship parts are still not hit
   for (let y = 0; y < 10; y++) {
     for (let x = 0; x < 10; x++) {
-      if (board[y][x] !== null && board[y][x] !== 'H' && board[y][x] !== 'M') {
-        return false; // Still has ships
+      const cell = board[y][x];
+      // If there's a ship part that's not hit (not 'H' or 'M'), game is not over
+      if (cell !== null && cell !== 'H' && cell !== 'M') {
+        return false;
       }
     }
   }
-  return true;
+  return true; // All ship parts are hit
 }
 
 // Start server
