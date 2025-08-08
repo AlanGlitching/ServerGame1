@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .status {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Netlify Deployment Test</h1>
+        <div class="status success">✅ Deployment Working!</div>
+        <p>If you can see this page, Netlify is serving files correctly.</p>
+        <p>The issue is likely with the React app build configuration.</p>
+        
+        <h3>Next Steps:</h3>
+        <ul style="text-align: left; display: inline-block;">
+            <li>Check Netlify build logs</li>
+            <li>Verify build directory settings</li>
+            <li>Ensure React app builds successfully</li>
+        </ul>
+        
+        <p><strong>Current URL:</strong> <span id="current-url"></span></p>
+    </div>
+    
+    <script>
+        document.getElementById('current-url').textContent = window.location.href;
+    </script>
+</body>
+</html> 
