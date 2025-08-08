@@ -14,9 +14,8 @@ function getServerURL() {
   
   // Netlify deployment - replace with your actual backend URL
   if (hostname.includes('netlify.app')) {
-    // You need to replace this with your actual deployed backend URL
-    // For now, return null to show a helpful message
-    return null; // Replace with your Railway/Render/Heroku URL when ready
+    // Replace this with your actual Railway URL
+    return 'https://your-railway-app.railway.app'; // TODO: Replace with your actual Railway URL
   }
   
   // Default fallback
@@ -316,7 +315,7 @@ function App() {
 
   // Render backend setup message
   const renderBackendSetupMessage = () => {
-    if (SERVER_URL) return null;
+    if (SERVER_URL && !SERVER_URL.includes('your-railway-app')) return null;
     
     return (
       <div style={{
@@ -332,19 +331,18 @@ function App() {
         textAlign: 'center',
         zIndex: 1000
       }}>
-        <h2>🚀 Backend Server Required</h2>
-        <p>Your frontend is deployed, but you need to deploy the backend server to play multiplayer games.</p>
+        <h2>🚀 Backend Server Ready!</h2>
+        <p>Your Railway backend is deployed! Now you just need to update the frontend configuration.</p>
         
-        <h3>Quick Setup:</h3>
+        <h3>Final Step:</h3>
         <ol style={{ textAlign: 'left' }}>
-          <li><strong>Deploy to Railway:</strong> Go to <a href="https://railway.app" target="_blank" rel="noopener">railway.app</a></li>
-          <li><strong>Connect GitHub:</strong> Select your <code>ServerGame1</code> repository</li>
-          <li><strong>Set directory:</strong> Use <code>server</code> as the root directory</li>
-          <li><strong>Get URL:</strong> Copy the Railway URL (e.g., <code>https://your-app.railway.app</code>)</li>
-          <li><strong>Update code:</strong> Replace <code>null</code> with your Railway URL in <code>client/src/App.js</code></li>
+          <li><strong>Get your Railway URL:</strong> Go to your <a href="https://railway.com/project/29d26fb2-21d9-4d48-a0ef-6cbc838ceb29/service/33c5d971-e804-4281-bfb1-ffc6f259f823?environmentId=5e98b4bb-1f7e-47b1-94a7-60b8039b778c" target="_blank" rel="noopener">Railway dashboard</a></li>
+          <li><strong>Copy the URL:</strong> Look for the deployment URL (e.g., <code>https://your-app-name.railway.app</code>)</li>
+          <li><strong>Update the code:</strong> Replace <code>https://your-railway-app.railway.app</code> with your actual Railway URL in <code>client/src/App.js</code></li>
+          <li><strong>Push changes:</strong> Commit and push the updated code</li>
         </ol>
         
-        <p><strong>Or test locally:</strong> Run <code>npm run dev</code> to test with local servers.</p>
+        <p><strong>Current placeholder:</strong> <code>{SERVER_URL}</code></p>
       </div>
     );
   };
