@@ -2,10 +2,10 @@
 nixPkgs = ["nodejs_18", "npm"]
 
 [phases.install]
-cmds = ["chmod +x start-server.sh"]
+cmds = ["cd server && npm install"]
 
 [phases.build]
 cmds = ["echo 'Build completed'"]
 
 [start]
-cmd = "./start-server.sh" 
+cmd = "cd server && npm start" 
