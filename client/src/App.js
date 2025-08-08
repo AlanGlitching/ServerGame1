@@ -5,7 +5,6 @@ import './App.css';
 // Smart server URL detection
 function getServerURL() {
   const hostname = window.location.hostname;
-  const port = window.location.port;
   
   // Local development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -34,6 +33,7 @@ function App() {
   const [success, setSuccess] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [rematchRequested, setRematchRequested] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [rematchRequestedBy, setRematchRequestedBy] = useState('');
 
   // Initialize socket connection
