@@ -2,7 +2,27 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import './App.css';
 
-const SERVER_URL = 'http://localhost:3001';
+// Smart server URL detection
+function getServerURL() {
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  
+  // Local development
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:3001';
+  }
+  
+  // Netlify deployment - replace with your actual backend URL
+  if (hostname.includes('netlify.app')) {
+    // You need to replace this with your actual deployed backend URL
+    return 'https://your-backend-url.railway.app'; // Replace with your Railway/Render/Heroku URL
+  }
+  
+  // Default fallback
+  return 'http://localhost:3001';
+}
+
+const SERVER_URL = getServerURL();
 
 function App() {
   const [socket, setSocket] = useState(null);
