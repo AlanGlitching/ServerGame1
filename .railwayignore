@@ -7,4 +7,5 @@ DEPLOYMENT.md
 *.bat
 *.sh
 test*.html
-check-build.js 
+check-build.js
+package-client.json 
