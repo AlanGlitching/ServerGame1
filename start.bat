@@ -1,0 +1,9 @@
+@echo off
+echo Starting Multiplayer Tic Tac Toe...
+echo.
+echo Installing dependencies...
+npm run install:all
+echo.
+echo Starting the application...
+npm run dev
+pause 
