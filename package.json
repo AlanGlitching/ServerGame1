@@ -2,11 +2,10 @@
   "name": "tic-tac-toe-server",
   "version": "1.0.0",
   "description": "Multiplayer Tic Tac Toe game server",
-  "main": "server/index.js",
+  "main": "simple-server.js",
   "scripts": {
-    "start": "cd server && npm install && npm start",
-    "install": "cd server && npm install",
-    "dev": "cd server && npm run dev"
+    "start": "node simple-server.js",
+    "dev": "nodemon simple-server.js"
   },
   "engines": {
     "node": "18.x"
