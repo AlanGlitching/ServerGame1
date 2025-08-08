@@ -4,8 +4,12 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  CI = "false"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200 
+  status = 200
+
+[build.processing]
+  skip_processing = false 
