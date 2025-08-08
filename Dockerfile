@@ -3,17 +3,17 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
 COPY server/package*.json ./server/
 
 # Install dependencies
-RUN npm install --prefix server
+WORKDIR /app/server
+RUN npm install
 
 # Copy server code
-COPY server/ ./server/
+COPY server/ ./
 
-# Expose port
-EXPOSE 3001
+# Expose port (Railway will use PORT environment variable)
+EXPOSE $PORT
 
 # Start the server
-CMD ["npm", "start", "--prefix", "server"] 
+CMD ["npm", "start"] 
