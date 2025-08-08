@@ -1,19 +1,12 @@
 {
-  "name": "multiplayer-tic-tac-toe",
+  "name": "tic-tac-toe-deployment",
   "version": "1.0.0",
-  "description": "Multiplayer Tic Tac Toe game with React frontend and Node.js backend",
-  "main": "server/index.js",
+  "description": "Deployment package for Tic Tac Toe server",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd server && npm run dev",
-    "client": "cd client && npm start",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
-    "start": "cd server && npm start"
+    "start": "cd server && npm install && npm start",
+    "install": "cd server && npm install"
   },
-  "keywords": ["tic-tac-toe", "multiplayer", "react", "socket.io", "node.js"],
-  "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+  "engines": {
+    "node": "18.x"
   }
 } 
