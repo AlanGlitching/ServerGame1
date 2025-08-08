@@ -1,7 +1,7 @@
 [build]
   base = "client"
   publish = "build"
-  command = "npm ci --legacy-peer-deps && npm run build"
+  command = "npm ci --legacy-peer-deps && npx react-scripts build"
 
 [build.environment]
   NODE_VERSION = "18"
