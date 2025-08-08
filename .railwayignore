@@ -1,0 +1,10 @@
+client/
+node_modules/
+.git/
+.gitignore
+README.md
+DEPLOYMENT.md
+*.bat
+*.sh
+test*.html
+check-build.js 

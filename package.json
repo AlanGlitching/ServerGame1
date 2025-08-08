@@ -1,12 +1,23 @@
 {
-  "name": "tic-tac-toe-deployment",
+  "name": "tic-tac-toe-server",
   "version": "1.0.0",
-  "description": "Deployment package for Tic Tac Toe server",
+  "description": "Multiplayer Tic Tac Toe game server",
+  "main": "server/index.js",
   "scripts": {
     "start": "cd server && npm install && npm start",
-    "install": "cd server && npm install"
+    "install": "cd server && npm install",
+    "dev": "cd server && npm run dev"
   },
   "engines": {
     "node": "18.x"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.4",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
   }
 } 
