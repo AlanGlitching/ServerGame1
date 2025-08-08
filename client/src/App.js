@@ -15,7 +15,8 @@ function getServerURL() {
   // Netlify deployment - replace with your actual backend URL
   if (hostname.includes('netlify.app')) {
     // You need to replace this with your actual deployed backend URL
-    return 'https://your-backend-url.railway.app'; // Replace with your Railway/Render/Heroku URL
+    // For now, return null to show a helpful message
+    return null; // Replace with your Railway/Render/Heroku URL when ready
   }
   
   // Default fallback
@@ -38,6 +39,12 @@ function App() {
 
   // Initialize socket connection
   useEffect(() => {
+    if (!SERVER_URL) {
+      console.log('❌ No server URL configured for this environment');
+      setError('Backend server not configured. Please deploy the backend server first.');
+      return;
+    }
+    
     console.log('🔌 Initializing Socket.IO connection to:', SERVER_URL);
     const newSocket = io(SERVER_URL);
     setSocket(newSocket);
@@ -307,9 +314,45 @@ function App() {
     </div>
   );
 
+  // Render backend setup message
+  const renderBackendSetupMessage = () => {
+    if (SERVER_URL) return null;
+    
+    return (
+      <div style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        background: 'rgba(255, 255, 255, 0.95)',
+        padding: '30px',
+        borderRadius: '15px',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+        maxWidth: '500px',
+        textAlign: 'center',
+        zIndex: 1000
+      }}>
+        <h2>🚀 Backend Server Required</h2>
+        <p>Your frontend is deployed, but you need to deploy the backend server to play multiplayer games.</p>
+        
+        <h3>Quick Setup:</h3>
+        <ol style={{ textAlign: 'left' }}>
+          <li><strong>Deploy to Railway:</strong> Go to <a href="https://railway.app" target="_blank" rel="noopener">railway.app</a></li>
+          <li><strong>Connect GitHub:</strong> Select your <code>ServerGame1</code> repository</li>
+          <li><strong>Set directory:</strong> Use <code>server</code> as the root directory</li>
+          <li><strong>Get URL:</strong> Copy the Railway URL (e.g., <code>https://your-app.railway.app</code>)</li>
+          <li><strong>Update code:</strong> Replace <code>null</code> with your Railway URL in <code>client/src/App.js</code></li>
+        </ol>
+        
+        <p><strong>Or test locally:</strong> Run <code>npm run dev</code> to test with local servers.</p>
+      </div>
+    );
+  };
+
   return (
     <div className="container">
       {renderConnectionStatus()}
+      {renderBackendSetupMessage()}
       
       <div className="game-container">
         <div className="header">
